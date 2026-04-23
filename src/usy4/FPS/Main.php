@@ -181,6 +181,15 @@ class Main extends PluginBase implements Listener
             case 'jukebox':
                 $player->sendJukeboxPopup($message);
                 break;
+            case 'actionbar':
+                if (method_exists($player, 'sendActionBarMessage')) {
+                    $player->sendActionBarMessage($message);
+                } elseif (method_exists($player, 'sendActionBar')) {
+                    $player->sendActionBar($message);
+                } else {
+                    $player->sendTip($message);
+                }
+                break;
             case 'scoreboard':
                 // For scoreboard mode, we only show via ScoreHUD
                 // The ScoreHUD update happens in updateScoreHudTag method
@@ -340,7 +349,7 @@ class Main extends PluginBase implements Listener
         $form = new CustomForm(function (Player $player, ?array $data) {
             if ($data === null) return;
 
-            $types = ['popup', 'tip', 'jukebox', 'scoreboard'];
+            $types = ['popup', 'tip', 'jukebox', 'scoreboard', 'actionbar'];
             $this->playerSettings[$player->getName()]['display_type'] = $types[$data[0]];
 
             $player->sendMessage(TextFormat::GREEN . "Display type updated to: " . $types[$data[0]]);
@@ -354,14 +363,15 @@ class Main extends PluginBase implements Listener
         $form->setTitle(TextFormat::AQUA . "Display Settings");
 
         $settings = $this->getPlayerSettings($player);
-        $types = ['popup', 'tip', 'jukebox', 'scoreboard'];
+        $types = ['popup', 'tip', 'jukebox', 'scoreboard', 'actionbar'];
         $currentIndex = array_search($settings['display_type'], $types);
 
         $form->addDropdown("Display Type", [
             "Popup (Above hotbar)",
             "Tip (Above action bar)",
             "Jukebox (Center-top)",
-            "Scoreboard (ScoreHUD required)"
+            "Scoreboard (ScoreHUD required)",
+            "Action Bar"
         ], $currentIndex);
 
         $player->sendForm($form);
